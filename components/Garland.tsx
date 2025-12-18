@@ -48,10 +48,8 @@ export default function Garland({ visible, text }: GarlandProps) {
         ctx.textBaseline = 'middle';
         
         const textToDraw = `${text}   ✦   ${text}   ✦   ${text}`; 
-        // 修改：分别在高度的 25% 和 75% 处绘制文字
-        // 这样当 radialSegments 为 2 时，带子的正面和反面正好各显示一行文字
-        ctx.fillText(textToDraw, canvas.width / 2, canvas.height * 0.25);
-        ctx.fillText(textToDraw, canvas.width / 2, canvas.height * 0.75);
+        // 改回：只在正中间绘制一次，因为新几何体 UV 是标准的
+        ctx.fillText(textToDraw, canvas.width / 2, canvas.height / 2);
     }
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -86,9 +84,62 @@ export default function Garland({ visible, text }: GarlandProps) {
     };
   }, [treeHeight, treeRadius, spiralLoops]);
 
+
+    // === 新增：自定义几何体生成，确保飘带“铺”在树上 ===
+  const ribbonGeometry = useMemo(() => {
+    // 增加分段数以保证平滑
+    const segments = 512;
+    const points = ribbonCurve.getPoints(segments);
+    // 计算弗雷内标架：Tangents, Normals, Binormals
+    // Binormals 对于螺旋线通常大致垂直于地面，适合用来构建贴合树面的带子宽度
+    const frames = ribbonCurve.computeFrenetFrames(segments, false);
+    
+    const positions = [];
+    const uvs = [];
+    const indices = [];
+    const width = 0.35; // 飘带宽度
+
+    for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        const axis = frames.binormals[i]; // 使用副法线方向扩展宽度
+
+        // 顶点1：沿副法线正向偏移
+        const v1 = p.clone().addScaledVector(axis, width / 2);
+        // 顶点2：沿副法线负向偏移
+        const v2 = p.clone().addScaledVector(axis, -width / 2);
+
+        positions.push(v1.x, v1.y, v1.z);
+        positions.push(v2.x, v2.y, v2.z);
+
+        // UV映射
+        const u = (i / segments) * (spiralLoops * 1.5);
+        uvs.push(u, 1); // 上边缘
+        uvs.push(u, 0); // 下边缘
+    }
+
+    // 构建三角形索引
+    for (let i = 0; i < segments; i++) {
+        const base = i * 2;
+        // 两个三角形组成一个矩形面
+        indices.push(base, base + 1, base + 2);
+        indices.push(base + 1, base + 3, base + 2);
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+
+    return geo;
+  }, [ribbonCurve, spiralLoops]);
+
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const ribbonMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
 
+    
+
+    
   useFrame((state) => {
     // 原始呼吸灯带逻辑
     if(materialRef.current) {
@@ -100,11 +151,11 @@ export default function Garland({ visible, text }: GarlandProps) {
     }
   });
 
-  if (!visible) return null;
+if (!visible) return null;
 
   return (
     <group>
-      {/* 1. 呼吸闪烁灯带 - 使用 lightCurve */}
+      {/* 1. 呼吸闪烁灯带 */}
       <mesh>
         <tubeGeometry args={[lightCurve, 128, 0.04, 8, false]} />
         <meshStandardMaterial
@@ -118,14 +169,9 @@ export default function Garland({ visible, text }: GarlandProps) {
         />
       </mesh>
 
-      {/* 2. 奢华银色文字飘带 - 使用 ribbonCurve */}
-      <mesh>
-        {/* 修改：
-            radius -> 0.25 (稍微变宽)
-            radialSegments -> 2 (关键：设为2会变成扁平的长方形带子)
-            tubularSegments -> 512 (增加平滑度) 
-        */}
-        <tubeGeometry args={[ribbonCurve, 512, 0.25, 2, false]} />
+      {/* 2. 奢华银色文字飘带 - 使用自定义 geometry */}
+      <mesh geometry={ribbonGeometry}>
+        {/* 不再使用 tubeGeometry */}
         <meshPhysicalMaterial
           ref={ribbonMatRef}
           map={texture}
@@ -133,8 +179,8 @@ export default function Garland({ visible, text }: GarlandProps) {
           transparent
           opacity={0.95}
           roughness={0.2}
-          metalness={1.0} // 强金属感
-          clearcoat={1.0} // 表面清漆，增加光泽
+          metalness={1.0}
+          clearcoat={1.0}
           clearcoatRoughness={0.1}
           side={THREE.DoubleSide}
           toneMapped={false}
