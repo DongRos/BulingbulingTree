@@ -108,6 +108,7 @@ export default function DiamondParticles({ mode }: DiamondParticlesProps) {
         emissive="#ccf2ff"
         emissiveIntensity={0.12}
         toneMapped={false}
+        depthWrite={false}
       />
     </instancedMesh>
   );
