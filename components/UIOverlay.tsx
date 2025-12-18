@@ -18,11 +18,13 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
   currentMode, setMode, blurLevel, setBlurLevel, 
   titleText, setTitleText, ribbonText, setRibbonText, snowLevel, setSnowLevel 
 }) => {
-  const [isEditingRibbon, setIsEditingRibbon] = useState(false); // 控制编辑状态
+  const [isEditingRibbon, setIsEditingRibbon] = useState(false);
+  // 新增：控制右上角菜单展开状态
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <>
-      {/* Title - 改为 Input 以支持编辑 */}
+      {/* Title (保持不变) */}
       <div className="absolute top-12 left-0 right-0 text-center z-10 opacity-80 mix-blend-screen flex flex-col items-center">
          <input 
             value={titleText}
@@ -33,14 +35,22 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
          <p className="font-sans text-xs text-gray-400 mt-2 tracking-[0.3em] pointer-events-none">H A U T E &nbsp; C O U T U R E</p>
       </div>
 
-      {/* Bottom Controls */}
-      <div className="absolute bottom-12 left-0 right-0 z-20 px-12 flex flex-col md:flex-row justify-between items-end md:items-center gap-6 pointer-events-none">
-        
-        {/* Left: Sliders Container */}
-        <div className="pointer-events-auto flex flex-col gap-6 items-start">
-            
-            {/* 新增：左下角极简奢华修改按钮 */}
-            <div className="flex flex-col gap-2 items-start">
+      {/* === 右上角折叠菜单 === */}
+      <div className="absolute top-12 right-12 z-30 flex flex-col items-end">
+        {/* 展开/收起按钮 - 极简奢华风格 */}
+        <button 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="pointer-events-auto text-xs tracking-[0.2em] text-gray-300 hover:text-white border border-white/20 px-4 py-2 backdrop-blur-sm transition-all hover:border-white/50 uppercase"
+        >
+          {isMenuOpen ? 'CLOSE CONTROLS' : 'CONTROLS +'}
+        </button>
+
+        {/* 折叠的内容面板 */}
+        {isMenuOpen && (
+          <div className="mt-4 pointer-events-auto flex flex-col gap-6 items-end p-6 bg-black/40 backdrop-blur-md border border-white/10 w-64 transition-all animate-in fade-in slide-in-from-top-4">
+             
+             {/* 1. Ribbon Text Edit */}
+             <div className="flex flex-col gap-2 items-end w-full">
               <label className="text-[10px] tracking-[0.2em] text-gray-500">CUSTOMIZE RIBBON</label>
               {isEditingRibbon ? (
                 <input 
@@ -48,83 +58,56 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
                   value={ribbonText}
                   onChange={(e) => setRibbonText(e.target.value)}
                   onBlur={() => setIsEditingRibbon(false)}
-                  className="w-40 bg-transparent border-b border-white/50 text-white font-serif italic outline-none text-sm py-1"
+                  className="w-full bg-transparent border-b border-white/50 text-white font-serif italic outline-none text-right text-sm py-1"
                 />
               ) : (
                 <button 
                   onClick={() => setIsEditingRibbon(true)}
-                  className="px-4 py-2 border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-white/10 hover:border-white/50 transition-all duration-500 text-xs tracking-widest text-gray-300 hover:text-white font-serif"
+                  className="text-xs text-white/80 hover:text-white border-b border-transparent hover:border-white/50 transition-all italic font-serif"
                 >
-                  EDIT TEXT
+                  "{ribbonText}" &nbsp; ✎
                 </button>
               )}
             </div>
 
-            {/* Existing Blur Slider */}
-            <div className="flex flex-col gap-2 items-start group">
-              <label className="text-[10px] tracking-[0.2em] text-gray-500 group-hover:text-white transition-colors duration-300">
-                LENS FOCUS
-              </label>
-              <div className="relative w-32 h-6 flex items-center">
-                 <input 
-                   type="range" min="0" max="1" step="0.01" value={blurLevel}
-                   onChange={(e) => setBlurLevel(parseFloat(e.target.value))}
-                   className="w-full h-[2px] bg-white/20 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
-                 />
-              </div>
+            {/* 2. Lens Focus Slider */}
+            <div className="flex flex-col gap-2 items-end w-full">
+              <label className="text-[10px] tracking-[0.2em] text-gray-500">LENS FOCUS</label>
+               <input 
+                 type="range" min="0" max="1" step="0.01" value={blurLevel}
+                 onChange={(e) => setBlurLevel(parseFloat(e.target.value))}
+                 className="w-full h-[2px] bg-white/20 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
+               />
             </div>
 
-            {/* New Snow Slider */}
-            <div className="flex flex-col gap-2 items-start group">
-              <label className="text-[10px] tracking-[0.2em] text-gray-500 group-hover:text-white transition-colors duration-300">
-                SNOWFALL
-              </label>
-              <div className="relative w-32 h-6 flex items-center">
-                 <input 
-                   type="range" min="0" max="1" step="0.01" value={snowLevel}
-                   onChange={(e) => setSnowLevel(parseFloat(e.target.value))}
-                   className="w-full h-[2px] bg-white/20 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
-                 />
-              </div>
+            {/* 3. Snowfall Slider */}
+            <div className="flex flex-col gap-2 items-end w-full">
+              <label className="text-[10px] tracking-[0.2em] text-gray-500">SNOWFALL</label>
+               <input 
+                 type="range" min="0" max="1" step="0.01" value={snowLevel}
+                 onChange={(e) => setSnowLevel(parseFloat(e.target.value))}
+                 className="w-full h-[2px] bg-white/20 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
+               />
             </div>
 
           </div>
+        )}
+      </div>
 
-        {/* Center: Action Buttons */}
-        <div className="flex gap-4 pointer-events-auto mx-auto md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
-          <button
-            onClick={() => setMode('WISH')}
-            className={`
-              relative px-8 py-3 rounded-full border transition-all duration-500 ease-out backdrop-blur-md
-              font-serif tracking-wider text-sm md:text-base
-              ${currentMode === 'WISH' 
-                ? 'bg-white/10 border-white/50 text-white shadow-[0_0_20px_rgba(255,255,255,0.3)]' 
-                : 'bg-black/20 border-white/10 text-white/50 hover:bg-white/5 hover:text-white'}
-            `}
-          >
-            <span className="mr-2">✨</span> WISH
-          </button>
-
-          <button
-            onClick={() => setMode(currentMode === 'CHAOS' ? 'WISH' : 'CHAOS')}
-            className={`
-              relative px-8 py-3 rounded-full border transition-all duration-500 ease-out backdrop-blur-md
-              font-serif tracking-wider text-sm md:text-base
-              ${currentMode === 'CHAOS' 
-                ? 'bg-purple-500/20 border-purple-400/50 text-purple-100 shadow-[0_0_20px_rgba(168,85,247,0.4)]' 
-                : 'bg-black/20 border-white/10 text-white/50 hover:bg-white/5 hover:text-white'}
-            `}
-          >
-            {currentMode === 'CHAOS' ? 'CLOSE CHAOS' : 'UNLEASH CHAOS'}
-          </button>
-        </div>
-
-        {/* Right: Spacer for balance or future stats */}
-        <div className="hidden md:block w-32"></div>
-
+      {/* === 底部按钮 (仅保留 Chaos 居中) === */}
+      <div className="absolute bottom-12 left-0 right-0 z-20 flex justify-center items-center pointer-events-none">
+        <button 
+          onClick={() => setMode(currentMode === 'CHAOS' ? 'WISH' : 'CHAOS')} // 点击切换回 Wish 或保持 Chaos 逻辑自定，这里设为 Toggle
+          className={`pointer-events-auto px-8 py-3 border transition-all duration-500 tracking-[0.3em] text-xs md:text-sm uppercase
+            ${currentMode === 'CHAOS' 
+              ? 'bg-red-900/20 border-red-500 text-red-500 shadow-[0_0_30px_rgba(220,38,38,0.3)]' 
+              : 'bg-black/20 border-white/30 text-white hover:bg-white/10 hover:border-white'
+            }`}
+        >
+          {currentMode === 'CHAOS' ? 'CALM DOWN' : 'UNLEASH CHAOS'}
+        </button>
       </div>
     </>
   );
-};
-
+}
 export default UIOverlay;
