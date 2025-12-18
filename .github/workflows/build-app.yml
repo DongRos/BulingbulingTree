@@ -1,0 +1,46 @@
+name: Build Desktop App
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: # 允许你手动点击按钮触发构建
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 这里使用 npm install 会自动读取我们在 package.json 中手动添加的依赖
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Electron App
+        run: npm run electron:build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows Artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: CyberpunkTree-Windows
+          path: release/*.exe
+
+      - name: Upload Mac Artifact
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: BulingTree-Mac
+          path: release/*.dmg
