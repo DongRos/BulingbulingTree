@@ -42,26 +42,16 @@ export default function Scene({ mode, blurLevel, titleText, snowLevel }: ScenePr
       {/* 只有当 snowLevel > 0 时显示 */}
       {snowLevel > 0 && (
         <>
-           {/* 下落的雪花：范围大，速度受 snowLevel 影响 */}
+           {/* 下落的雪花：保留 */}
            <Sparkles 
-             count={Math.floor(snowLevel * 2000)} // 数量由滑块控制
+             count={Math.floor(snowLevel * 2000)} 
              scale={[25, 25, 25]} 
-             size={4 + snowLevel * 3} // 大小由滑块控制
+             size={4 + snowLevel * 3} 
              speed={0.5 + snowLevel * 0.5} 
              opacity={0.8}
              color="#ffffff"
            />
-           {/* 地面积雪：一个简单的白色圆盘，带一点粗糙度 */}
-           <mesh position={[0, -6, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-             <circleGeometry args={[12 + snowLevel * 5, 64]} />
-             <meshStandardMaterial 
-                color="#ffffff" 
-                roughness={1} 
-                metalness={0.1}
-                opacity={Math.min(snowLevel, 0.8)} // 积雪随控制显现
-                transparent
-             />
-           </mesh>
+           {/* 已删除地面积雪 mesh */}
         </>
       )}
 
