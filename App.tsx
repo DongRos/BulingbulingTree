@@ -7,8 +7,9 @@ import UIOverlay from './components/UIOverlay';
 export default function App() {
   const [mode, setMode] = useState<'WISH' | 'CHAOS'>('WISH');
   const [blurLevel, setBlurLevel] = useState(0);
-  // 新增状态：标题文字 和 下雪程度
   const [titleText, setTitleText] = useState("Noel Cyberpunk");
+  // 新增：独立的飘带文字状态，默认英文
+  const [ribbonText, setRibbonText] = useState("Merry Christmas");
   const [snowLevel, setSnowLevel] = useState(0.5);
 
   return (
@@ -25,8 +26,8 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
-          {/* 将新的状态传递给 Scene */}
-          <Scene mode={mode} blurLevel={blurLevel} titleText={titleText} snowLevel={snowLevel} />
+          {/* 传入 ribbonText */}
+          <Scene mode={mode} blurLevel={blurLevel} titleText={titleText} ribbonText={ribbonText} snowLevel={snowLevel} />
         </Suspense>
       </Canvas>
       
@@ -42,9 +43,11 @@ export default function App() {
         setMode={setMode} 
         blurLevel={blurLevel}
         setBlurLevel={setBlurLevel}
-        // 传递给 UI
         titleText={titleText}
         setTitleText={setTitleText}
+        // 传入 ribbonText 控制方法
+        ribbonText={ribbonText}
+        setRibbonText={setRibbonText}
         snowLevel={snowLevel}
         setSnowLevel={setSnowLevel}
       />
