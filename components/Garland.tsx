@@ -32,10 +32,17 @@ export default function Garland({ visible, text }: GarlandProps) {
         ctx.lineWidth = 4;
         ctx.strokeRect(0,0, canvas.width, canvas.height);
 
-        // 3. 文字：奢华浅金色
+        // 文字设置 - 奢华字体
         ctx.font = 'bold italic 50px "Playfair Display", serif';
-        ctx.fillStyle = '#F4E4BC'; // 浅香槟金
-        ctx.shadowColor = 'rgba(255, 215, 0, 0.8)'; // 金色发光晕
+        
+        // 修改：奢华金色渐变文字
+        const textGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        textGradient.addColorStop(0, '#D4AF37'); // 古典金
+        textGradient.addColorStop(0.5, '#FFF8E1'); // 高光金
+        textGradient.addColorStop(1, '#D4AF37');
+        ctx.fillStyle = textGradient;
+        
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
         ctx.shadowBlur = 10;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -52,18 +59,28 @@ export default function Garland({ visible, text }: GarlandProps) {
     return tex;
   }, [text, spiralLoops]);
 
-  // 2. 曲线路径 (保持不变)
-  const curve = useMemo(() => {
-    const points = [];
+ // 2. 曲线路径 (拆分为灯带和飘带两条，实现交错)
+  const { lightCurve, ribbonCurve } = useMemo(() => {
+    const pLight = [];
+    const pRibbon = [];
     const count = 100;
     for (let i = 0; i <= count; i++) {
       const t = i / count;
       const y = (t - 0.5) * treeHeight;
       const radius = (1 - t) * (treeRadius + 0.5); 
+      
+      // 灯带的基础角度
       const angle = t * Math.PI * 2 * spiralLoops;
-      points.push(new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius));
+      pLight.push(new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius));
+
+      // 飘带的角度：偏移 Math.PI (180度)，使其位于树的对面，与灯带交错互不遮挡
+      const angleRibbon = angle + Math.PI; 
+      pRibbon.push(new THREE.Vector3(Math.cos(angleRibbon) * radius, y, Math.sin(angleRibbon) * radius));
     }
-    return new THREE.CatmullRomCurve3(points);
+    return { 
+      lightCurve: new THREE.CatmullRomCurve3(pLight), 
+      ribbonCurve: new THREE.CatmullRomCurve3(pRibbon) 
+    };
   }, [treeHeight, treeRadius, spiralLoops]);
 
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
@@ -84,9 +101,9 @@ export default function Garland({ visible, text }: GarlandProps) {
 
   return (
     <group>
-      {/* 1. 恢复原始的“呼吸闪烁灯带” (作为内芯) */}
+      {/* 1. 呼吸闪烁灯带 - 使用 lightCurve */}
       <mesh>
-        <tubeGeometry args={[curve, 128, 0.04, 8, false]} />
+        <tubeGeometry args={[lightCurve, 128, 0.04, 8, false]} />
         <meshStandardMaterial
           ref={materialRef}
           color={CONFIG.colors.garland}
@@ -98,10 +115,9 @@ export default function Garland({ visible, text }: GarlandProps) {
         />
       </mesh>
 
-      {/* 2. 新增：薄薄的奢华银色文字飘带 (包裹在外面) */}
+      {/* 2. 奢华银色文字飘带 - 使用 ribbonCurve */}
       <mesh>
-        {/* radius 0.15 (薄)，radialSegments 4 (扁平感) */}
-        <tubeGeometry args={[curve, 256, 0.15, 4, false]} />
+        <tubeGeometry args={[ribbonCurve, 256, 0.15, 4, false]} />
         <meshPhysicalMaterial
           ref={ribbonMatRef}
           map={texture}
