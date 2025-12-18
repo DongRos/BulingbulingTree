@@ -1,21 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react'; // 引入 useState
 
 interface UIOverlayProps {
   currentMode: 'WISH' | 'CHAOS';
   setMode: (mode: 'WISH' | 'CHAOS') => void;
   blurLevel: number;
   setBlurLevel: (val: number) => void;
-  // 新增 Props
   titleText: string;
   setTitleText: (val: string) => void;
+  // 新增 Ribbon Props
+  ribbonText: string;
+  setRibbonText: (val: string) => void;
   snowLevel: number;
   setSnowLevel: (val: number) => void;
 }
 
 const UIOverlay: React.FC<UIOverlayProps> = ({ 
   currentMode, setMode, blurLevel, setBlurLevel, 
-  titleText, setTitleText, snowLevel, setSnowLevel 
+  titleText, setTitleText, ribbonText, setRibbonText, snowLevel, setSnowLevel 
 }) => {
+  const [isEditingRibbon, setIsEditingRibbon] = useState(false); // 控制编辑状态
+
   return (
     <>
       {/* Title - 改为 Input 以支持编辑 */}
@@ -33,8 +37,29 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
       <div className="absolute bottom-12 left-0 right-0 z-20 px-12 flex flex-col md:flex-row justify-between items-end md:items-center gap-6 pointer-events-none">
         
         {/* Left: Sliders Container */}
-        <div className="pointer-events-auto flex flex-col gap-4 items-start">
+        <div className="pointer-events-auto flex flex-col gap-6 items-start">
             
+            {/* 新增：左下角极简奢华修改按钮 */}
+            <div className="flex flex-col gap-2 items-start">
+              <label className="text-[10px] tracking-[0.2em] text-gray-500">CUSTOMIZE RIBBON</label>
+              {isEditingRibbon ? (
+                <input 
+                  autoFocus
+                  value={ribbonText}
+                  onChange={(e) => setRibbonText(e.target.value)}
+                  onBlur={() => setIsEditingRibbon(false)}
+                  className="w-40 bg-transparent border-b border-white/50 text-white font-serif italic outline-none text-sm py-1"
+                />
+              ) : (
+                <button 
+                  onClick={() => setIsEditingRibbon(true)}
+                  className="px-4 py-2 border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-white/10 hover:border-white/50 transition-all duration-500 text-xs tracking-widest text-gray-300 hover:text-white font-serif"
+                >
+                  EDIT TEXT
+                </button>
+              )}
+            </div>
+
             {/* Existing Blur Slider */}
             <div className="flex flex-col gap-2 items-start group">
               <label className="text-[10px] tracking-[0.2em] text-gray-500 group-hover:text-white transition-colors duration-300">
