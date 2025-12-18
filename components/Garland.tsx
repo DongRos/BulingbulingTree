@@ -31,9 +31,9 @@ export default function Garland({ visible, text }: GarlandProps) {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
         ctx.lineWidth = 4;
         ctx.strokeRect(0,0, canvas.width, canvas.height);
-
-        // 文字设置 - 奢华字体
-        ctx.font = 'bold italic 50px "Playfair Display", serif';
+        
+// 文字设置 - 奢华字体 (字体稍微调小一点，防止撑满边缘)
+        ctx.font = 'bold italic 40px "Playfair Display", serif';
         
         // 修改：奢华金色渐变文字
         const textGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
@@ -42,13 +42,16 @@ export default function Garland({ visible, text }: GarlandProps) {
         textGradient.addColorStop(1, '#D4AF37');
         ctx.fillStyle = textGradient;
         
-        ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.8)'; 
         ctx.shadowBlur = 10;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
         const textToDraw = `${text}   ✦   ${text}   ✦   ${text}`; 
-        ctx.fillText(textToDraw, canvas.width / 2, canvas.height / 2);
+        // 修改：分别在高度的 25% 和 75% 处绘制文字
+        // 这样当 radialSegments 为 2 时，带子的正面和反面正好各显示一行文字
+        ctx.fillText(textToDraw, canvas.width / 2, canvas.height * 0.25);
+        ctx.fillText(textToDraw, canvas.width / 2, canvas.height * 0.75);
     }
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -117,7 +120,12 @@ export default function Garland({ visible, text }: GarlandProps) {
 
       {/* 2. 奢华银色文字飘带 - 使用 ribbonCurve */}
       <mesh>
-        <tubeGeometry args={[ribbonCurve, 256, 0.15, 4, false]} />
+        {/* 修改：
+            radius -> 0.25 (稍微变宽)
+            radialSegments -> 2 (关键：设为2会变成扁平的长方形带子)
+            tubularSegments -> 512 (增加平滑度) 
+        */}
+        <tubeGeometry args={[ribbonCurve, 512, 0.25, 2, false]} />
         <meshPhysicalMaterial
           ref={ribbonMatRef}
           map={texture}
