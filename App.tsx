@@ -14,7 +14,7 @@ export default function App() {
         dpr={[1, 2]} 
         camera={{ position: [0, 0, 22], fov: 40 }}
         gl={{ 
-          antialias: true, // PostProcessing handles it but base AA helps stability
+          antialias: false,
           stencil: false,
           depth: true,
           powerPreference: 'high-performance',
