@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { CONFIG } from '../constants';
 import { useFrame } from '@react-three/fiber';
@@ -56,4 +56,4 @@ export default function Garland({ visible }: GarlandProps) {
   );
 }
 
-import { useRef } from 'react';
+
