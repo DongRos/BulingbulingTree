@@ -7,6 +7,9 @@ import UIOverlay from './components/UIOverlay';
 export default function App() {
   const [mode, setMode] = useState<'WISH' | 'CHAOS'>('WISH');
   const [blurLevel, setBlurLevel] = useState(0);
+  // 新增状态：标题文字 和 下雪程度
+  const [titleText, setTitleText] = useState("Noel Cyberpunk");
+  const [snowLevel, setSnowLevel] = useState(0.5);
 
   return (
     <div className="relative w-full h-screen bg-black text-white overflow-hidden">
@@ -22,7 +25,8 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
-          <Scene mode={mode} blurLevel={blurLevel} />
+          {/* 将新的状态传递给 Scene */}
+          <Scene mode={mode} blurLevel={blurLevel} titleText={titleText} snowLevel={snowLevel} />
         </Suspense>
       </Canvas>
       
@@ -38,6 +42,11 @@ export default function App() {
         setMode={setMode} 
         blurLevel={blurLevel}
         setBlurLevel={setBlurLevel}
+        // 传递给 UI
+        titleText={titleText}
+        setTitleText={setTitleText}
+        snowLevel={snowLevel}
+        setSnowLevel={setSnowLevel}
       />
     </div>
   );
