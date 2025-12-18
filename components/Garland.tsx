@@ -90,37 +90,51 @@ export default function Garland({ visible, text }: GarlandProps) {
     // 增加分段数以保证平滑
     const segments = 512;
     const points = ribbonCurve.getPoints(segments);
-    // 计算弗雷内标架：Tangents, Normals, Binormals
-    // Binormals 对于螺旋线通常大致垂直于地面，适合用来构建贴合树面的带子宽度
-    const frames = ribbonCurve.computeFrenetFrames(segments, false);
+    const ribbonGeometry = useMemo(() => {
+    const segments = 512;
+    // 获取点，但不使用 FrenetFrames
+    const points = ribbonCurve.getPoints(segments);
     
     const positions = [];
     const uvs = [];
     const indices = [];
-    const width = 0.35; // 飘带宽度
+    const width = 0.35;
 
     for (let i = 0; i < points.length; i++) {
         const p = points[i];
-        const axis = frames.binormals[i]; // 使用副法线方向扩展宽度
+        
+        // === 修复逻辑：自定义标架，使飘带始终平铺在树体表面 ===
+        
+        // 1. 获取当前点的切线向量 (Tangent)
+        // 使用 getTangentAt (0~1)
+        const tVal = i / segments;
+        const tangent = ribbonCurve.getTangentAt(tVal).normalize();
 
-        // 顶点1：沿副法线正向偏移
-        const v1 = p.clone().addScaledVector(axis, width / 2);
-        // 顶点2：沿副法线负向偏移
-        const v2 = p.clone().addScaledVector(axis, -width / 2);
+        // 2. 获取径向向量 (Radial Vector) - 即平面的法线方向
+        // 假设树是直立在 Y 轴上的，径向就是 (x, 0, z) 的归一化
+        const radial = new THREE.Vector3(p.x, 0, p.z).normalize();
+
+        // 3. 计算宽度方向向量 (Width Vector / Binormal)
+        // 宽度方向应该是：垂直于径向(Normal)，也垂直于切线(Tangent)
+        // 这样生成的面的法线就是 Radial，即面朝外
+        const widthAxis = new THREE.Vector3().crossVectors(radial, tangent).normalize();
+
+        // 顶点生成
+        const v1 = p.clone().addScaledVector(widthAxis, width / 2);
+        const v2 = p.clone().addScaledVector(widthAxis, -width / 2);
 
         positions.push(v1.x, v1.y, v1.z);
         positions.push(v2.x, v2.y, v2.z);
 
         // UV映射
         const u = (i / segments) * (spiralLoops * 1.5);
-        uvs.push(u, 1); // 上边缘
-        uvs.push(u, 0); // 下边缘
+        uvs.push(u, 1); 
+        uvs.push(u, 0); 
     }
 
     // 构建三角形索引
     for (let i = 0; i < segments; i++) {
         const base = i * 2;
-        // 两个三角形组成一个矩形面
         indices.push(base, base + 1, base + 2);
         indices.push(base + 1, base + 3, base + 2);
     }
@@ -153,9 +167,9 @@ export default function Garland({ visible, text }: GarlandProps) {
 
 if (!visible) return null;
 
-  return (
+return (
     <group>
-      {/* 1. 呼吸闪烁灯带 */}
+      {/* 1. 灯带 (保持不变) */}
       <mesh>
         <tubeGeometry args={[lightCurve, 128, 0.04, 8, false]} />
         <meshStandardMaterial
@@ -169,20 +183,18 @@ if (!visible) return null;
         />
       </mesh>
 
-     {/* 2. 奢华银色文字飘带 - 使用自定义 geometry */}
+      {/* 2. 飘带 - 使用哑光材质 */}
       <mesh geometry={ribbonGeometry}>
-        {/* 不再使用 tubeGeometry */}
-        <meshPhysicalMaterial
+        <meshStandardMaterial // 改用 Standard 材质
           ref={ribbonMatRef}
           map={texture}
           color="#ffffff"
-          // 移除 transparent 和 opacity，使其完全不透明
-          roughness={0.2}
-          metalness={1.0} 
-          clearcoat={1.0}
-          clearcoatRoughness={0.1}
+          roughness={0.8}   // 高粗糙度，哑光效果
+          metalness={0.0}   // 无金属感，防止反光干扰文字
+          emissive="#000000"
           side={THREE.DoubleSide}
-          toneMapped={false}
+          toneMapped={false} // 保持颜色鲜艳
+          transparent={false} // 不透明
         />
       </mesh>
     </group>
