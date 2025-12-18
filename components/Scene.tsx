@@ -54,6 +54,7 @@ export default function Scene({ mode, blurLevel }: SceneProps) {
           opacity={0.3} 
           noise={0.1} 
           color="#ffffff" 
+          depthWrite={false}
         />
         
         {/* 2. Rising Frost - Medium particles with upward bias */}
@@ -65,6 +66,7 @@ export default function Scene({ mode, blurLevel }: SceneProps) {
           opacity={0.2} 
           noise={0.6} 
           color="#e0f7ff" 
+          depthWrite={false}
         />
 
         {/* 3. Twinkling Ice Crystals - Sharp, fine highlights */}
@@ -76,6 +78,7 @@ export default function Scene({ mode, blurLevel }: SceneProps) {
           opacity={0.6} 
           noise={2.0} 
           color="#b3e5fc" 
+          depthWrite={false}
         />
 
         {/* 4. Large Soft Bokeh - Luxurious blurred aura */}
@@ -87,6 +90,7 @@ export default function Scene({ mode, blurLevel }: SceneProps) {
           opacity={0.1} 
           noise={0.2} 
           color="#ffffff" 
+          depthWrite={false}
         />
       </group>
 
