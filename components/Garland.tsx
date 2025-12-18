@@ -89,9 +89,6 @@ export default function Garland({ visible, text }: GarlandProps) {
   const ribbonGeometry = useMemo(() => {
     // 增加分段数以保证平滑
     const segments = 512;
-    const points = ribbonCurve.getPoints(segments);
-    const ribbonGeometry = useMemo(() => {
-    const segments = 512;
     // 获取点，但不使用 FrenetFrames
     const points = ribbonCurve.getPoints(segments);
     
