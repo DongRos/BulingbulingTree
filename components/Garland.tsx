@@ -18,12 +18,12 @@ export default function Garland({ visible, text }: GarlandProps) {
     canvas.height = 128; // 长条形纹理
     const ctx = canvas.getContext('2d');
     if (ctx) {
-        // 1. 背景：奢华银色，带一点透明感
+        // 1. 背景：实心奢华银色 (去除透明度)
         // 使用 createLinearGradient 制造金属光泽
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, 'rgba(220, 220, 225, 0.4)'); // 亮银
-        gradient.addColorStop(0.5, 'rgba(192, 192, 200, 0.8)'); // 灰银
-        gradient.addColorStop(1, 'rgba(220, 220, 225, 0.4)');
+        gradient.addColorStop(0, '#E8E8EC'); // 实心亮银白
+        gradient.addColorStop(0.5, '#C0C0C8'); // 实心金属灰
+        gradient.addColorStop(1, '#E8E8EC');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
@@ -169,17 +169,16 @@ if (!visible) return null;
         />
       </mesh>
 
-      {/* 2. 奢华银色文字飘带 - 使用自定义 geometry */}
+     {/* 2. 奢华银色文字飘带 - 使用自定义 geometry */}
       <mesh geometry={ribbonGeometry}>
         {/* 不再使用 tubeGeometry */}
         <meshPhysicalMaterial
           ref={ribbonMatRef}
           map={texture}
           color="#ffffff"
-          transparent
-          opacity={0.95}
+          // 移除 transparent 和 opacity，使其完全不透明
           roughness={0.2}
-          metalness={1.0}
+          metalness={1.0} 
           clearcoat={1.0}
           clearcoatRoughness={0.1}
           side={THREE.DoubleSide}
