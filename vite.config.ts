@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
+      base: './', // <--- 必须添加这一行，否则 App 打开是黑屏
       server: {
         port: 3000,
         host: '0.0.0.0',
