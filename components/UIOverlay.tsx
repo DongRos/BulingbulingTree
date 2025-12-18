@@ -5,39 +5,65 @@ interface UIOverlayProps {
   setMode: (mode: 'WISH' | 'CHAOS') => void;
   blurLevel: number;
   setBlurLevel: (val: number) => void;
+  // 新增 Props
+  titleText: string;
+  setTitleText: (val: string) => void;
+  snowLevel: number;
+  setSnowLevel: (val: number) => void;
 }
 
-const UIOverlay: React.FC<UIOverlayProps> = ({ currentMode, setMode, blurLevel, setBlurLevel }) => {
+const UIOverlay: React.FC<UIOverlayProps> = ({ 
+  currentMode, setMode, blurLevel, setBlurLevel, 
+  titleText, setTitleText, snowLevel, setSnowLevel 
+}) => {
   return (
     <>
-      {/* Title */}
-      <div className="absolute top-12 left-0 right-0 text-center pointer-events-none z-10 opacity-80 mix-blend-screen">
-         <h1 className="font-serif text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-widest uppercase">
-            Noel Cyberpunk
-         </h1>
-         <p className="font-sans text-xs text-gray-400 mt-2 tracking-[0.3em]">H A U T E &nbsp; C O U T U R E</p>
+      {/* Title - 改为 Input 以支持编辑 */}
+      <div className="absolute top-12 left-0 right-0 text-center z-10 opacity-80 mix-blend-screen flex flex-col items-center">
+         <input 
+            value={titleText}
+            onChange={(e) => setTitleText(e.target.value)}
+            className="font-serif text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-widest uppercase text-center bg-transparent border-none outline-none w-full cursor-text pointer-events-auto"
+            style={{ textShadow: '0 0 30px rgba(255,255,255,0.2)' }}
+         />
+         <p className="font-sans text-xs text-gray-400 mt-2 tracking-[0.3em] pointer-events-none">H A U T E &nbsp; C O U T U R E</p>
       </div>
 
       {/* Bottom Controls */}
       <div className="absolute bottom-12 left-0 right-0 z-20 px-12 flex flex-col md:flex-row justify-between items-end md:items-center gap-6 pointer-events-none">
         
-        {/* Left: Minimalist Blur Slider */}
-        <div className="pointer-events-auto flex flex-col gap-2 items-start group">
-          <label className="text-[10px] tracking-[0.2em] text-gray-500 group-hover:text-white transition-colors duration-300">
-            LENS FOCUS
-          </label>
-          <div className="relative w-32 h-6 flex items-center">
-             <input 
-               type="range" 
-               min="0" 
-               max="1" 
-               step="0.01"
-               value={blurLevel}
-               onChange={(e) => setBlurLevel(parseFloat(e.target.value))}
-               className="w-full h-[2px] bg-white/20 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
-             />
+        {/* Left: Sliders Container */}
+        <div className="pointer-events-auto flex flex-col gap-4 items-start">
+            
+            {/* Existing Blur Slider */}
+            <div className="flex flex-col gap-2 items-start group">
+              <label className="text-[10px] tracking-[0.2em] text-gray-500 group-hover:text-white transition-colors duration-300">
+                LENS FOCUS
+              </label>
+              <div className="relative w-32 h-6 flex items-center">
+                 <input 
+                   type="range" min="0" max="1" step="0.01" value={blurLevel}
+                   onChange={(e) => setBlurLevel(parseFloat(e.target.value))}
+                   className="w-full h-[2px] bg-white/20 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
+                 />
+              </div>
+            </div>
+
+            {/* New Snow Slider */}
+            <div className="flex flex-col gap-2 items-start group">
+              <label className="text-[10px] tracking-[0.2em] text-gray-500 group-hover:text-white transition-colors duration-300">
+                SNOWFALL
+              </label>
+              <div className="relative w-32 h-6 flex items-center">
+                 <input 
+                   type="range" min="0" max="1" step="0.01" value={snowLevel}
+                   onChange={(e) => setSnowLevel(parseFloat(e.target.value))}
+                   className="w-full h-[2px] bg-white/20 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
+                 />
+              </div>
+            </div>
+
           </div>
-        </div>
 
         {/* Center: Action Buttons */}
         <div className="flex gap-4 pointer-events-auto mx-auto md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
