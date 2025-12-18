@@ -9,14 +9,15 @@ import PostEffects from './PostEffects';
 interface SceneProps {
   mode: 'WISH' | 'CHAOS';
   blurLevel: number;
+  titleText: string; // 新增
+  snowLevel: number; // 新增
 }
 
-export default function Scene({ mode, blurLevel }: SceneProps) {
+export default function Scene({ mode, blurLevel, titleText, snowLevel }: SceneProps) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state, delta) => {
     if (groupRef.current) {
-      // Elegant, very slow rotation
       groupRef.current.rotation.y += delta * 0.08;
     }
   });
@@ -25,15 +26,10 @@ export default function Scene({ mode, blurLevel }: SceneProps) {
     <>
       <PerspectiveCamera makeDefault position={[0, 0, 20]} />
       <OrbitControls 
-        enablePan={false} 
-        minDistance={8} 
-        maxDistance={35} 
-        autoRotate={false} 
-        enableDamping={true}
-        dampingFactor={0.05}
+        enablePan={false} minDistance={8} maxDistance={35} 
+        autoRotate={false} enableDamping={true} dampingFactor={0.05}
       />
 
-      {/* Stable Studio Lighting */}
       <ambientLight intensity={0.4} color="#001133" />
       <pointLight position={[15, 15, 15]} intensity={2} color="#ffffff" />
       <pointLight position={[-15, -10, -15]} intensity={1.5} color="#4455ff" />
@@ -41,6 +37,33 @@ export default function Scene({ mode, blurLevel }: SceneProps) {
 
       <Environment preset="night" background={false} />
       <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={0.5} />
+
+      {/* === 新增：动态下雪系统 === */}
+      {/* 只有当 snowLevel > 0 时显示 */}
+      {snowLevel > 0 && (
+        <>
+           {/* 下落的雪花：范围大，速度受 snowLevel 影响 */}
+           <Sparkles 
+             count={Math.floor(snowLevel * 2000)} // 数量由滑块控制
+             scale={[25, 25, 25]} 
+             size={4 + snowLevel * 3} // 大小由滑块控制
+             speed={0.5 + snowLevel * 0.5} 
+             opacity={0.8}
+             color="#ffffff"
+           />
+           {/* 地面积雪：一个简单的白色圆盘，带一点粗糙度 */}
+           <mesh position={[0, -6, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+             <circleGeometry args={[12 + snowLevel * 5, 64]} />
+             <meshStandardMaterial 
+                color="#ffffff" 
+                roughness={1} 
+                metalness={0.1}
+                opacity={Math.min(snowLevel, 0.8)} // 积雪随控制显现
+                transparent
+             />
+           </mesh>
+        </>
+      )}
 
       {/* --- HIGH-DENSITY LUXURY COLD MIST --- */}
       {/* Layered for volume and size variation, depthWrite: false to prevent flickering */}
@@ -96,18 +119,13 @@ export default function Scene({ mode, blurLevel }: SceneProps) {
 
       <group ref={groupRef}>
         <DiamondParticles mode={mode} />
-        <Garland visible={mode === 'WISH'} />
+        {/* 传入文字给 Garland */}
+        <Garland visible={mode === 'WISH'} text={titleText} />
         
-        {/* Topper Star - Refined */}
         {mode === 'WISH' && (
           <mesh position={[0, 6.2, 0]}>
             <icosahedronGeometry args={[0.55, 0]} />
-            <meshStandardMaterial 
-              color="#ffffff" 
-              emissive="#ffffff" 
-              emissiveIntensity={3}
-              toneMapped={false}
-            />
+            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={3} toneMapped={false} />
           </mesh>
         )}
       </group>
