@@ -7,8 +7,7 @@ interface UIOverlayProps {
   setBlurLevel: (val: number) => void;
   titleText: string;
   setTitleText: (val: string) => void;
-  // 新增 Ribbon Props
-  ribbonText: string;
+
   setRibbonText: (val: string) => void;
   snowLevel: number;
   setSnowLevel: (val: number) => void;
@@ -18,7 +17,7 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
   currentMode, setMode, blurLevel, setBlurLevel, 
   titleText, setTitleText, ribbonText, setRibbonText, snowLevel, setSnowLevel 
 }) => {
-  const [isEditingRibbon, setIsEditingRibbon] = useState(false);
+
   // 新增：控制右上角菜单展开状态
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -49,28 +48,8 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
         {isMenuOpen && (
           <div className="mt-4 pointer-events-auto flex flex-col gap-6 items-end p-6 bg-black/40 backdrop-blur-md border border-white/10 w-64 transition-all animate-in fade-in slide-in-from-top-4">
              
-             {/* 1. Ribbon Text Edit */}
-             <div className="flex flex-col gap-2 items-end w-full">
-              <label className="text-[10px] tracking-[0.2em] text-gray-500">CUSTOMIZE RIBBON</label>
-              {isEditingRibbon ? (
-                <input 
-                  autoFocus
-                  value={ribbonText}
-                  onChange={(e) => setRibbonText(e.target.value)}
-                  onBlur={() => setIsEditingRibbon(false)}
-                  className="w-full bg-transparent border-b border-white/50 text-white font-serif italic outline-none text-right text-sm py-1"
-                />
-              ) : (
-                <button 
-                  onClick={() => setIsEditingRibbon(true)}
-                  className="text-xs text-white/80 hover:text-white border-b border-transparent hover:border-white/50 transition-all italic font-serif"
-                >
-                  "{ribbonText}" &nbsp; ✎
-                </button>
-              )}
-            </div>
 
-            {/* 2. Lens Focus Slider */}
+            {/* 1. Lens Focus Slider */}
             <div className="flex flex-col gap-2 items-end w-full">
               <label className="text-[10px] tracking-[0.2em] text-gray-500">LENS FOCUS</label>
                <input 
@@ -80,7 +59,7 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
                />
             </div>
 
-            {/* 3. Snowfall Slider */}
+            {/* 2. Snowfall Slider */}
             <div className="flex flex-col gap-2 items-end w-full">
               <label className="text-[10px] tracking-[0.2em] text-gray-500">SNOWFALL</label>
                <input 
