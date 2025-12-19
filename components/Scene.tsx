@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react'; // 确保引入 useMemo
 import { useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, PerspectiveCamera, Stars, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
@@ -13,8 +13,26 @@ interface SceneProps {
   snowLevel: number;
 }
 
-export default function Scene({ mode, blurLevel, titleText, ribbonText, snowLevel }: SceneProps) {
+export default function Scene({ mode, blurLevel, titleText, snowLevel }: SceneProps) {
   const groupRef = useRef<THREE.Group>(null);
+
+  // 新增：创建五角星形状
+  const starShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    const points = 5;
+    const outerRadius = 0.8; // 星星大小
+    const innerRadius = 0.4;
+    for (let i = 0; i < points * 2; i++) {
+      const angle = (i * Math.PI) / points - Math.PI / 2; // 旋转让尖角朝上
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      if (i === 0) shape.moveTo(x, y);
+      else shape.lineTo(x, y);
+    }
+    shape.closePath();
+    return shape;
+  }, []);
 
   useFrame((state, delta) => {
     if (groupRef.current) {
@@ -113,8 +131,14 @@ export default function Scene({ mode, blurLevel, titleText, ribbonText, snowLeve
         <Garland visible={mode === 'WISH'} />
         
         {mode === 'WISH' && (
+          // 修改：使用挤压几何体生成 3D 五角星
           <mesh position={[0, 6.2, 0]}>
-            <icosahedronGeometry args={[0.55, 0]} />
+            <extrudeGeometry 
+              args={[
+                starShape, 
+                { depth: 0.2, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.05, bevelSegments: 3 }
+              ]} 
+            />
             <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={3} toneMapped={false} />
           </mesh>
         )}
