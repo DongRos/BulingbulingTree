@@ -8,6 +8,8 @@ export default function App() {
   const [mode, setMode] = useState<'WISH' | 'CHAOS'>('WISH');
   const [blurLevel, setBlurLevel] = useState(0);
   const [titleText, setTitleText] = useState("Noel Cyberpunk");
+// 新增：副标题状态
+  const [subtitleText, setSubtitleText] = useState("HAUTE COUTURE");
   const [snowLevel, setSnowLevel] = useState(0.5);
 
   return (
@@ -43,6 +45,9 @@ export default function App() {
         setBlurLevel={setBlurLevel}
         titleText={titleText}
         setTitleText={setTitleText}
+        // 传递副标题状态
+        subtitleText={subtitleText}
+        setSubtitleText={setSubtitleText}
         snowLevel={snowLevel}
         setSnowLevel={setSnowLevel}
       />
