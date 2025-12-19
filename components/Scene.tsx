@@ -16,14 +16,15 @@ interface SceneProps {
 export default function Scene({ mode, blurLevel, titleText, snowLevel }: SceneProps) {
   const groupRef = useRef<THREE.Group>(null);
 
-  // 新增：创建五角星形状
+ // 新增：创建五角星形状
   const starShape = useMemo(() => {
     const shape = new THREE.Shape();
     const points = 5;
     const outerRadius = 0.8; // 星星大小
     const innerRadius = 0.4;
     for (let i = 0; i < points * 2; i++) {
-      const angle = (i * Math.PI) / points - Math.PI / 2; // 旋转让尖角朝上
+      // 修改：将减号改为加号，使起始角度为 90 度（尖角朝上）
+      const angle = (i * Math.PI) / points + Math.PI / 2; 
       const radius = i % 2 === 0 ? outerRadius : innerRadius;
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
