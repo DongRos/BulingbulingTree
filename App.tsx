@@ -8,8 +8,6 @@ export default function App() {
   const [mode, setMode] = useState<'WISH' | 'CHAOS'>('WISH');
   const [blurLevel, setBlurLevel] = useState(0);
   const [titleText, setTitleText] = useState("Noel Cyberpunk");
-  // 新增：独立的飘带文字状态，默认英文
-  const [ribbonText, setRibbonText] = useState("Merry Christmas");
   const [snowLevel, setSnowLevel] = useState(0.5);
 
   return (
@@ -26,8 +24,8 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
-          {/* 传入 ribbonText */}
-          <Scene mode={mode} blurLevel={blurLevel} titleText={titleText} ribbonText={ribbonText} snowLevel={snowLevel} />
+          {/* 删除 ribbonText */}
+          <Scene mode={mode} blurLevel={blurLevel} titleText={titleText} snowLevel={snowLevel} />
         </Suspense>
       </Canvas>
       
@@ -45,9 +43,6 @@ export default function App() {
         setBlurLevel={setBlurLevel}
         titleText={titleText}
         setTitleText={setTitleText}
-        // 传入 ribbonText 控制方法
-        ribbonText={ribbonText}
-        setRibbonText={setRibbonText}
         snowLevel={snowLevel}
         setSnowLevel={setSnowLevel}
       />
