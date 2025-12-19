@@ -31,7 +31,7 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
          <input 
             value={titleText}
             onChange={(e) => setTitleText(e.target.value)}
-            {/* 修改：末尾添加 caret-white 以强制显示白色光标 */}
+  
             className="font-serif text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-widest uppercase text-center bg-transparent border-none outline-none w-full cursor-text pointer-events-auto caret-white"
             style={{ textShadow: '0 0 30px rgba(255,255,255,0.2)' }}
          />
