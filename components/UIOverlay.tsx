@@ -7,6 +7,9 @@ interface UIOverlayProps {
   setBlurLevel: (val: number) => void;
   titleText: string;
   setTitleText: (val: string) => void;
+  // 新增副标题 Props
+  subtitleText: string;
+  setSubtitleText: (val: string) => void;
 
 
   snowLevel: number;
@@ -31,7 +34,12 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
             className="font-serif text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-widest uppercase text-center bg-transparent border-none outline-none w-full cursor-text pointer-events-auto"
             style={{ textShadow: '0 0 30px rgba(255,255,255,0.2)' }}
          />
-         <p className="font-sans text-xs text-gray-400 mt-2 tracking-[0.3em] pointer-events-none">H A U T E &nbsp; C O U T U R E</p>
+         {/* 修改：将 P 标签改为 Input 标签 */}
+         <input 
+            value={subtitleText}
+            onChange={(e) => setSubtitleText(e.target.value)}
+            className="font-sans text-xs text-gray-400 mt-2 tracking-[0.3em] text-center bg-transparent border-none outline-none w-full cursor-text pointer-events-auto uppercase"
+         />
       </div>
 
       {/* === 右上角折叠菜单 === */}
