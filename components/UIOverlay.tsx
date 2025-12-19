@@ -26,12 +26,13 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
 
   return (
     <>
-      {/* Title (保持不变) */}
+      {/* Title */}
       <div className="absolute top-12 left-0 right-0 text-center z-10 opacity-80 mix-blend-screen flex flex-col items-center">
          <input 
             value={titleText}
             onChange={(e) => setTitleText(e.target.value)}
-            className="font-serif text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-widest uppercase text-center bg-transparent border-none outline-none w-full cursor-text pointer-events-auto"
+            {/* 修改：末尾添加 caret-white 以强制显示白色光标 */}
+            className="font-serif text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-widest uppercase text-center bg-transparent border-none outline-none w-full cursor-text pointer-events-auto caret-white"
             style={{ textShadow: '0 0 30px rgba(255,255,255,0.2)' }}
          />
          {/* 修改：将 P 标签改为 Input 标签 */}
