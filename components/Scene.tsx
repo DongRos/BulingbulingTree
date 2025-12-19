@@ -109,7 +109,8 @@ export default function Scene({ mode, blurLevel, titleText, ribbonText, snowLeve
 
       <group ref={groupRef}>
         <DiamondParticles mode={mode} />
-
+        {/* 2. 把灯带组件加回来！ */}
+        <Garland visible={mode === 'WISH'} />
         
         {mode === 'WISH' && (
           <mesh position={[0, 6.2, 0]}>
