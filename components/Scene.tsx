@@ -10,7 +10,6 @@ interface SceneProps {
   mode: 'WISH' | 'CHAOS';
   blurLevel: number;
   titleText: string;
-  ribbonText: string; // 新增
   snowLevel: number;
 }
 
@@ -110,8 +109,7 @@ export default function Scene({ mode, blurLevel, titleText, ribbonText, snowLeve
 
       <group ref={groupRef}>
         <DiamondParticles mode={mode} />
-        {/* 传入独立的 ribbonText 给 Garland */}
-        <Garland visible={mode === 'WISH'} text={ribbonText} />
+
         
         {mode === 'WISH' && (
           <mesh position={[0, 6.2, 0]}>
