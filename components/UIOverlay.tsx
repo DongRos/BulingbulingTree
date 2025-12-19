@@ -35,7 +35,7 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
       </div>
 
       {/* === 右上角折叠菜单 === */}
-      <div className="absolute top-32 md:top-12 right-12 z-30 flex flex-col items-end">
+      <div className="absolute top-32 md:top-12 right-4 z-30 flex flex-col items-end">
         {/* 展开/收起按钮 - 极简奢华风格 */}
         <button 
           onClick={() => setIsMenuOpen(!isMenuOpen)}
