@@ -18,7 +18,7 @@ interface UIOverlayProps {
 
 const UIOverlay: React.FC<UIOverlayProps> = ({ 
   currentMode, setMode, blurLevel, setBlurLevel, 
-  titleText, setTitleText, snowLevel, setSnowLevel 
+  titleText, setTitleText, subtitleText, setSubtitleText, snowLevel, setSnowLevel 
 }) => {
 
   // 新增：控制右上角菜单展开状态
