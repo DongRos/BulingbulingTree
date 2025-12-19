@@ -1,101 +1,110 @@
-import React, { useState } from 'react'; // 引入 useState
+import React, { useState } from 'react';
 
 interface UIOverlayProps {
   currentMode: 'WISH' | 'CHAOS';
   setMode: (mode: 'WISH' | 'CHAOS') => void;
   blurLevel: number;
   setBlurLevel: (val: number) => void;
-  titleText: string;
-  setTitleText: (val: string) => void;
-  // 新增副标题 Props
-  subtitleText: string;
-  setSubtitleText: (val: string) => void;
-
-
-  snowLevel: number;
-  setSnowLevel: (val: number) => void;
+  snowSize: number;
+  setSnowSize: (val: number) => void;
+  title: string;
+  setTitle: (val: string) => void;
+  subtitle: string;
+  setSubtitle: (val: string) => void;
 }
 
 const UIOverlay: React.FC<UIOverlayProps> = ({ 
-  currentMode, setMode, blurLevel, setBlurLevel, 
-  titleText, setTitleText, subtitleText, setSubtitleText, snowLevel, setSnowLevel 
+  currentMode, setMode, blurLevel, setBlurLevel, snowSize, setSnowSize,
+  title, setTitle, subtitle, setSubtitle
 }) => {
-
-  // 新增：控制右上角菜单展开状态
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showControls, setShowControls] = useState(false);
 
   return (
     <>
-      {/* Title (保持不变) */}
-      <div className="absolute top-12 left-0 right-0 text-center z-10 opacity-80 mix-blend-screen flex flex-col items-center">
-         <input 
-            value={titleText}
-            onChange={(e) => setTitleText(e.target.value)}
-  
-            className="font-serif text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-widest uppercase text-center bg-transparent border-none outline-none w-full cursor-text pointer-events-auto caret-white"
-            style={{ textShadow: '0 0 30px rgba(255,255,255,0.2)' }}
-         />
-         {/* 修改：将 P 标签改为 Input 标签 */}
-         <input 
-            value={subtitleText}
-            onChange={(e) => setSubtitleText(e.target.value)}
-            className="font-sans text-xs text-gray-400 mt-2 tracking-[0.3em] text-center bg-transparent border-none outline-none w-full cursor-text pointer-events-auto uppercase"
-         />
+      {/* Center Top: Editable Titles */}
+      <div className="absolute top-12 left-0 right-0 text-center z-10 opacity-90 pointer-events-none">
+         <div className="pointer-events-auto inline-block px-4 max-w-[90vw]">
+            <h1 
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => setTitle(e.currentTarget.textContent || '')}
+              className="font-serif text-3xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 tracking-[0.2em] uppercase focus:outline-none focus:ring-1 focus:ring-white/20 rounded-lg cursor-text transition-all leading-tight"
+            >
+              {title}
+            </h1>
+            <p 
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => setSubtitle(e.currentTarget.textContent || '')}
+              className="font-sans text-[10px] text-gray-500 mt-4 tracking-[0.5em] focus:outline-none focus:text-white transition-colors cursor-text"
+            >
+              {subtitle}
+            </p>
+         </div>
       </div>
 
-      {/* === 右上角折叠菜单 === */}
-      <div className="absolute top-32 md:top-12 right-4 z-30 flex flex-col items-end">
-        {/* 展开/收起按钮 - 极简奢华风格 */}
-        <button 
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="pointer-events-auto text-xs tracking-[0.2em] text-gray-300 hover:text-white border border-white/20 px-4 py-2 backdrop-blur-sm transition-all hover:border-white/50 uppercase"
-        >
-          {isMenuOpen ? 'CLOSE CONTROLS' : 'CONTROLS +'}
-        </button>
-
-        {/* 折叠的内容面板 */}
-        {isMenuOpen && (
-          <div className="mt-4 pointer-events-auto flex flex-col gap-6 items-end p-6 bg-black/40 backdrop-blur-md border border-white/10 w-64 transition-all animate-in fade-in slide-in-from-top-4">
-             
-
-            {/* 1. Lens Focus Slider */}
-            <div className="flex flex-col gap-2 items-end w-full">
-              <label className="text-[10px] tracking-[0.2em] text-gray-500">LENS FOCUS</label>
-               <input 
-                 type="range" min="0" max="1" step="0.01" value={blurLevel}
-                 onChange={(e) => setBlurLevel(parseFloat(e.target.value))}
-                 className="w-full h-[2px] bg-white/20 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
-               />
+      {/* Bottom Integrated UI Container */}
+      <div className="absolute bottom-12 left-0 right-0 z-20 px-12 flex flex-col items-center gap-4 pointer-events-none">
+        
+        {/* Control Panel: Floating above the main pill */}
+        {showControls && (
+          <div className="w-64 bg-black/40 border border-white/10 backdrop-blur-xl rounded-2xl p-6 flex flex-col gap-6 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-auto mb-2">
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between">
+                <label className="text-[9px] tracking-[0.2em] text-gray-400">SNOW DENSITY</label>
+                <span className="text-[9px] text-white/50">{Math.round(snowSize * 100)}%</span>
+              </div>
+              <input 
+                type="range" min="0" max="1" step="0.01" value={snowSize}
+                onChange={(e) => setSnowSize(parseFloat(e.target.value))}
+                className="w-full h-[2px] bg-white/10 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+              />
             </div>
 
-            {/* 2. Snowfall Slider */}
-            <div className="flex flex-col gap-2 items-end w-full">
-              <label className="text-[10px] tracking-[0.2em] text-gray-500">SNOWFALL</label>
-               <input 
-                 type="range" min="0" max="1" step="0.01" value={snowLevel}
-                 onChange={(e) => setSnowLevel(parseFloat(e.target.value))}
-                 className="w-full h-[2px] bg-white/20 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
-               />
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between">
+                <label className="text-[9px] tracking-[0.2em] text-gray-400">LENS FOCUS</label>
+                <span className="text-[9px] text-white/50">{Math.round(blurLevel * 100)}%</span>
+              </div>
+              <input 
+                type="range" min="0" max="1" step="0.01" value={blurLevel}
+                onChange={(e) => setBlurLevel(parseFloat(e.target.value))}
+                className="w-full h-[2px] bg-white/10 appearance-none cursor-pointer rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+              />
             </div>
-
           </div>
         )}
-      </div>
 
-      {/* === 底部按钮 (仅保留 Chaos 居中) === */}
-      <div className="absolute bottom-12 left-0 right-0 z-20 flex justify-center items-center pointer-events-none">
-        <button 
-          onClick={() => setMode(currentMode === 'CHAOS' ? 'WISH' : 'CHAOS')} // 点击切换回 Wish 或保持 Chaos 逻辑自定，这里设为 Toggle
-          className={`pointer-events-auto px-8 py-3 border transition-all duration-500 tracking-[0.3em] text-xs md:text-sm uppercase
-            ${currentMode === 'CHAOS' 
-              ? 'bg-red-900/20 border-red-500 text-red-500 shadow-[0_0_30px_rgba(220,38,38,0.3)]' 
-              : 'bg-black/20 border-white/30 text-white hover:bg-white/10 hover:border-white'
-            }`}
-        >
-          {currentMode === 'CHAOS' ? 'CALM DOWN' : 'UNLEASH CHAOS'}
-        </button>
+        {/* The Unified Luxury Pill */}
+        <div className={`
+          flex items-center pointer-events-auto rounded-full border transition-all duration-700 ease-in-out backdrop-blur-md shadow-2xl
+          ${currentMode === 'CHAOS' 
+            ? 'bg-purple-500/10 border-purple-400/40 shadow-[0_0_50px_rgba(168,85,247,0.2)]' 
+            : 'bg-white/5 border-white/20'}
+        `}>
+          {/* Main Action Area */}
+          <button
+            onClick={() => setMode(currentMode === 'CHAOS' ? 'WISH' : 'CHAOS')}
+            className="pl-10 pr-6 py-4 font-serif tracking-[0.3em] text-[10px] md:text-xs text-white/80 hover:text-white transition-colors active:scale-95"
+          >
+            {currentMode === 'CHAOS' ? 'REASSEMBLE' : 'UNLEASH CHAOS'}
+          </button>
+          
+          {/* Minimalist Separator */}
+          <div className="w-[1px] h-4 bg-white/10" />
+          
+          {/* Integrated Control Button */}
+          <button
+            onClick={() => setShowControls(!showControls)}
+            className="w-12 h-12 flex items-center justify-center text-lg text-white/30 hover:text-white transition-all active:scale-90"
+            aria-label="Toggle Controls"
+          >
+            {showControls ? '✕' : '+'}
+          </button>
+        </div>
       </div>
     </>
   );
-}
+};
+
 export default UIOverlay;

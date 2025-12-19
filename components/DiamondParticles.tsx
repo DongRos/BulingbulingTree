@@ -18,6 +18,7 @@ export default function DiamondParticles({ mode }: DiamondParticlesProps) {
     const sc = new Float32Array(particleCount);
 
     for (let i = 0; i < particleCount; i++) {
+      // Tree Morph
       const yNorm = Math.random(); 
       const y = (yNorm - 0.5) * treeHeight; 
       const rAtHeight = (1 - yNorm) * treeRadius;
@@ -28,19 +29,20 @@ export default function DiamondParticles({ mode }: DiamondParticlesProps) {
       tPos[i * 3 + 1] = y;
       tPos[i * 3 + 2] = r * Math.sin(theta);
 
-      const chaosRadius = 12 + Math.random() * 20;
+      // Explosive Chaos Positions
+      const chaosRadius = 15 + Math.random() * 35;
       const chaosTheta = Math.random() * Math.PI * 2;
       const chaosPhi = Math.acos(2 * Math.random() - 1);
       
       cPos[i * 3] = chaosRadius * Math.sin(chaosPhi) * Math.cos(chaosTheta);
-      cPos[i * 3 + 1] = chaosRadius * Math.sin(chaosPhi) * Math.sin(chaosTheta) * 0.4;
+      cPos[i * 3 + 1] = chaosRadius * Math.sin(chaosPhi) * Math.sin(chaosTheta);
       cPos[i * 3 + 2] = chaosRadius * Math.cos(chaosPhi);
 
-      rRot[i * 3] = (Math.random() - 0.5) * 1.5;
-      rRot[i * 3 + 1] = (Math.random() - 0.5) * 1.5;
-      rRot[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
+      rRot[i * 3] = (Math.random() - 0.5) * 2;
+      rRot[i * 3 + 1] = (Math.random() - 0.5) * 2;
+      rRot[i * 3 + 2] = (Math.random() - 0.5) * 2;
 
-      sc[i] = 0.04 + Math.random() * 0.14;
+      sc[i] = 0.03 + Math.random() * 0.15;
     }
 
     return { targetPositions: tPos, chaosPositions: cPos, randomRotations: rRot, scales: sc };
@@ -58,7 +60,8 @@ export default function DiamondParticles({ mode }: DiamondParticlesProps) {
 
     const time = state.clock.getElapsedTime();
     const isWish = mode === 'WISH';
-    const lerpFactor = isWish ? 0.04 : 0.02;
+    // Dynamic lerp factor for "explosion" feel
+    const lerpFactor = isWish ? 0.06 : 0.03;
 
     for (let i = 0; i < particleCount; i++) {
       const idx = i * 3;
@@ -67,12 +70,13 @@ export default function DiamondParticles({ mode }: DiamondParticlesProps) {
       let ty = isWish ? targetPositions[idx + 1] : chaosPositions[idx + 1];
       let tz = isWish ? targetPositions[idx + 2] : chaosPositions[idx + 2];
 
-      if (isWish) {
-         ty += Math.sin(time * 0.5 + tx) * 0.04; // Very subtle luxury drift
-      } else {
-         const angle = time * 0.15 + i * 0.01;
-         tx += Math.cos(angle) * 1.5;
-         tz += Math.sin(angle) * 1.5;
+      if (!isWish) {
+         // Add some orbital drift in chaos
+         const orbitalSpeed = 0.05 + (i % 50) * 0.001;
+         const ox = Math.cos(time * orbitalSpeed + i) * 2;
+         const oz = Math.sin(time * orbitalSpeed + i) * 2;
+         tx += ox;
+         tz += oz;
       }
 
       currentPositions[idx] = THREE.MathUtils.lerp(currentPositions[idx], tx, lerpFactor);
@@ -104,11 +108,9 @@ export default function DiamondParticles({ mode }: DiamondParticlesProps) {
         thickness={2.5}
         ior={2.417} 
         clearcoat={1}
-        clearcoatRoughness={0}
         emissive="#ccf2ff"
         emissiveIntensity={0.12}
         toneMapped={false}
-        depthWrite={false}
       />
     </instancedMesh>
   );

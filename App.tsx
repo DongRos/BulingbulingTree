@@ -7,10 +7,9 @@ import UIOverlay from './components/UIOverlay';
 export default function App() {
   const [mode, setMode] = useState<'WISH' | 'CHAOS'>('WISH');
   const [blurLevel, setBlurLevel] = useState(0);
-  const [titleText, setTitleText] = useState("Noel Cyberpunk");
-// 新增：副标题状态
-  const [subtitleText, setSubtitleText] = useState("HAUTE COUTURE");
-  const [snowLevel, setSnowLevel] = useState(0.5);
+  const [snowSize, setSnowSize] = useState(0.5);
+  const [title, setTitle] = useState('MERRY CHRISTMAS');
+  const [subtitle, setSubtitle] = useState('HAUTE COUTURE');
 
   return (
     <div className="relative w-full h-screen bg-black text-white overflow-hidden">
@@ -18,16 +17,20 @@ export default function App() {
         dpr={[1, 2]} 
         camera={{ position: [0, 0, 22], fov: 40 }}
         gl={{ 
-          antialias: false,
+          antialias: true,
           stencil: false,
           depth: true,
           powerPreference: 'high-performance',
           alpha: false
         }}
       >
+        <color attach="background" args={['#000000']} />
         <Suspense fallback={null}>
-          {/* 删除 ribbonText */}
-          <Scene mode={mode} blurLevel={blurLevel} titleText={titleText} snowLevel={snowLevel} />
+          <Scene 
+            mode={mode} 
+            blurLevel={blurLevel} 
+            snowSize={snowSize} 
+          />
         </Suspense>
       </Canvas>
       
@@ -43,13 +46,12 @@ export default function App() {
         setMode={setMode} 
         blurLevel={blurLevel}
         setBlurLevel={setBlurLevel}
-        titleText={titleText}
-        setTitleText={setTitleText}
-        // 传递副标题状态
-        subtitleText={subtitleText}
-        setSubtitleText={setSubtitleText}
-        snowLevel={snowLevel}
-        setSnowLevel={setSnowLevel}
+        snowSize={snowSize}
+        setSnowSize={setSnowSize}
+        title={title}
+        setTitle={setTitle}
+        subtitle={subtitle}
+        setSubtitle={setSubtitle}
       />
     </div>
   );

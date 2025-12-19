@@ -1,39 +1,135 @@
-import React, { useRef, useMemo } from 'react'; // 确保引入 useMemo
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, PerspectiveCamera, Stars, Sparkles } from '@react-three/drei';
-import * as THREE from 'three';
+import * as THREE from 'this';
+import * as THREE_LIB from 'three';
 import DiamondParticles from './DiamondParticles';
 import Garland from './Garland';
 import PostEffects from './PostEffects';
 
+// Explicitly use the imported THREE for types and constructors
+const THREE = THREE_LIB;
+
 interface SceneProps {
   mode: 'WISH' | 'CHAOS';
   blurLevel: number;
-  titleText: string;
-  snowLevel: number;
+  snowSize: number;
 }
 
-export default function Scene({ mode, blurLevel, titleText, snowLevel }: SceneProps) {
-  const groupRef = useRef<THREE.Group>(null);
-
- // 新增：创建五角星形状
+function StarTopper() {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
   const starShape = useMemo(() => {
     const shape = new THREE.Shape();
     const points = 5;
-    const outerRadius = 0.8; // 星星大小
-    const innerRadius = 0.4;
+    const outerRadius = 0.6;
+    const innerRadius = 0.28;
+    
     for (let i = 0; i < points * 2; i++) {
-      // 修改：将减号改为加号，使起始角度为 90 度（尖角朝上）
-      const angle = (i * Math.PI) / points + Math.PI / 2; 
+      // Start at Math.PI / 2 to make the first point (tip) at the top center
       const radius = i % 2 === 0 ? outerRadius : innerRadius;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius;
+      const angle = (i * Math.PI) / points - Math.PI / 2;
+      // We want the tip up, so at i=0, angle is -PI/2. 
+      // sin(-PI/2) = -1. To point UP, we need y to be positive.
+      // Let's adjust: angle = (i * Math.PI) / points + Math.PI / 2
+      const adjAngle = (i * Math.PI) / points - Math.PI / 2;
+      // Alternatively, just swap the sign or rotation. 
+      // Let's use standard polar: 0 is right, PI/2 is up.
+      const finalAngle = (i * Math.PI) / points + Math.PI / 2;
+      
+      const x = Math.cos(finalAngle) * radius;
+      const y = Math.sin(finalAngle) * radius;
+      
       if (i === 0) shape.moveTo(x, y);
       else shape.lineTo(x, y);
     }
     shape.closePath();
     return shape;
   }, []);
+
+  const extrudeSettings = {
+    steps: 1,
+    depth: 0.15,
+    bevelEnabled: true,
+    bevelThickness: 0.05,
+    bevelSize: 0.05,
+    bevelOffset: 0,
+    bevelSegments: 3
+  };
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      // Breathing effect
+      const mat = meshRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 3 + Math.sin(state.clock.elapsedTime * 2.5) * 2;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, 6.3, 0]}>
+      <extrudeGeometry args={[starShape, extrudeSettings]} />
+      <meshStandardMaterial 
+        color="#ffffff" 
+        emissive="#ffffff" 
+        emissiveIntensity={4}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+function Snow({ size, count = 1500 }: { size: number, count?: number }) {
+  const points = useRef<THREE.Points>(null);
+  
+  const particles = useMemo(() => {
+    const p = new Float32Array(count * 3);
+    const v = new Float32Array(count); // velocities
+    for (let i = 0; i < count; i++) {
+      p[i * 3] = (Math.random() - 0.5) * 50;
+      p[i * 3 + 1] = Math.random() * 50 - 25;
+      p[i * 3 + 2] = (Math.random() - 0.5) * 50;
+      v[i] = 0.05 + Math.random() * 0.1;
+    }
+    return { positions: p, velocities: v };
+  }, [count]);
+
+  useFrame(() => {
+    if (!points.current) return;
+    const pos = points.current.geometry.attributes.position.array as Float32Array;
+    for (let i = 0; i < count; i++) {
+      pos[i * 3 + 1] -= particles.velocities[i];
+      pos[i * 3] += Math.sin(Date.now() * 0.001 + i) * 0.01;
+      
+      if (pos[i * 3 + 1] < -25) {
+        pos[i * 3 + 1] = 25;
+      }
+    }
+    points.current.geometry.attributes.position.needsUpdate = true;
+  });
+
+  return (
+    <points ref={points}>
+      <bufferGeometry>
+        <bufferAttribute 
+          attach="attributes-position" 
+          count={count} 
+          array={particles.positions} 
+          itemSize={3} 
+        />
+      </bufferGeometry>
+      <pointsMaterial 
+        size={size * 0.3} 
+        color="#ffffff" 
+        transparent 
+        opacity={0.6} 
+        sizeAttenuation 
+      />
+    </points>
+  );
+}
+
+export default function Scene({ mode, blurLevel, snowSize }: SceneProps) {
+  const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state, delta) => {
     if (groupRef.current) {
@@ -45,104 +141,35 @@ export default function Scene({ mode, blurLevel, titleText, snowLevel }: ScenePr
     <>
       <PerspectiveCamera makeDefault position={[0, 0, 20]} />
       <OrbitControls 
-        enablePan={false} minDistance={8} maxDistance={35} 
-        autoRotate={false} enableDamping={true} dampingFactor={0.05}
+        enablePan={false} 
+        minDistance={8} 
+        maxDistance={35} 
+        enableDamping={true}
+        dampingFactor={0.05}
       />
 
       <ambientLight intensity={0.4} color="#001133" />
       <pointLight position={[15, 15, 15]} intensity={2} color="#ffffff" />
       <pointLight position={[-15, -10, -15]} intensity={1.5} color="#4455ff" />
-      <spotLight position={[0, 20, 0]} angle={0.3} penumbra={1} intensity={2} color="#ccf2ff" />
 
       <Environment preset="night" background={false} />
-      <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={0.5} />
+      <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={0.5} />
 
-      {/* === 新增：动态下雪系统 === */}
-      {/* 只有当 snowLevel > 0 时显示 */}
-      {snowLevel > 0 && (
-        <>
-           {/* 下落的雪花：保留 */}
-           <Sparkles 
-             count={Math.floor(snowLevel * 2000)} 
-             scale={[25, 25, 25]} 
-             size={4 + snowLevel * 3} 
-             speed={0.5 + snowLevel * 0.5} 
-             opacity={0.8}
-             color="#ffffff"
-           />
-           {/* 已删除地面积雪 mesh */}
-        </>
-      )}
+      <Sparkles 
+        count={5000} 
+        scale={25} 
+        size={2} 
+        speed={0.2} 
+        opacity={0.4} 
+        color="#ffffff" 
+      />
 
-      {/* --- HIGH-DENSITY LUXURY COLD MIST --- */}
-      {/* Layered for volume and size variation, depthWrite: false to prevent flickering */}
-      <group position={[0, -2, 0]}>
-        {/* 1. Core Vapor - Very dense, small particles */}
-        <Sparkles 
-          count={8000} 
-          scale={[5, 14, 5]} 
-          size={1.2} 
-          speed={0.15} 
-          opacity={0.3} 
-          noise={0.1} 
-          color="#ffffff" 
-          depthWrite={false}
-        />
-        
-        {/* 2. Rising Frost - Medium particles with upward bias */}
-        <Sparkles 
-          count={4000} 
-          scale={[10, 16, 10]} 
-          size={2.8} 
-          speed={0.4} 
-          opacity={0.2} 
-          noise={0.6} 
-          color="#e0f7ff" 
-          depthWrite={false}
-        />
-
-        {/* 3. Twinkling Ice Crystals - Sharp, fine highlights */}
-        <Sparkles 
-          count={3000} 
-          scale={[12, 18, 12]} 
-          size={0.7} 
-          speed={0.8} 
-          opacity={0.6} 
-          noise={2.0} 
-          color="#b3e5fc" 
-          depthWrite={false}
-        />
-
-        {/* 4. Large Soft Bokeh - Luxurious blurred aura */}
-        <Sparkles 
-          count={500} 
-          scale={[18, 20, 18]} 
-          size={10} 
-          speed={0.1} 
-          opacity={0.1} 
-          noise={0.2} 
-          color="#ffffff" 
-          depthWrite={false}
-        />
-      </group>
+      <Snow size={snowSize} count={2000} />
 
       <group ref={groupRef}>
         <DiamondParticles mode={mode} />
-        {/* 2. 把灯带组件加回来！ */}
         <Garland visible={mode === 'WISH'} />
-        
-        {mode === 'WISH' && (
-          // 修改：使用挤压几何体生成 3D 五角星
-          <mesh position={[0, 6.2, 0]}>
-            <extrudeGeometry 
-              args={[
-                starShape, 
-                { depth: 0.2, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.05, bevelSegments: 3 }
-              ]} 
-            />
-            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={3} toneMapped={false} />
-          </mesh>
-        )}
+        {mode === 'WISH' && <StarTopper />}
       </group>
 
       <PostEffects blurLevel={blurLevel} />
