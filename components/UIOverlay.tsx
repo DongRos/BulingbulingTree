@@ -26,7 +26,7 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
 
   return (
     <>
-      {/* Title */}
+      {/* Title (保持不变) */}
       <div className="absolute top-12 left-0 right-0 text-center z-10 opacity-80 mix-blend-screen flex flex-col items-center">
          <input 
             value={titleText}
